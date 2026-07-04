@@ -96,7 +96,7 @@ function saveToLocalStorage(song) {
   if (existing >= 0) {
     songs[existing] = song;
   } else {
-    songs.unshift(song);
+    songs.push(song);
   }
   localStorage.setItem('chord-viewer-songs', JSON.stringify(songs));
   return song;
