@@ -43,4 +43,4 @@ function transposeSongText(text, offset) {
   return text.replace(CHORD_RE, (chord) => transposeChord(chord, offset));
 }
 
-export { transposeChord, transposeSongText };
+export { noteToSemitone, transposeChord, transposeSongText };

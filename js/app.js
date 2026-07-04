@@ -1,16 +1,16 @@
-import { init as initStorage, deleteSong } from './storage/firebase.js';
+import { init as initStorage, deleteSong, saveSong } from './storage/firebase.js';
 import { createHomeView } from './views/home.js';
 import { createUploadView } from './views/upload.js';
 import { createSongView } from './views/song.js';
 import { createEditView } from './views/edit.js';
 import { parse } from './parser/index.js';
-import { transposeSongText } from './utils/transpose.js';
+import { transposeSongText, transposeChord, noteToSemitone } from './utils/transpose.js';
 
 const appEl = document.getElementById('app');
 const LOCK_CODE = '080826';
 
 window._parseModule = { parse };
-window._transposeModule = { transposeSongText };
+window._transposeModule = { transposeSongText, transposeChord };
 
 function showConfirm(message) {
   return new Promise(resolve => {
@@ -383,6 +383,8 @@ function detectSongKey(song, offset) {
   return key;
 }
 
+const KEY_OPTIONS = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'];
+
 function updateSongActions(sheet) {
   const existing = sheet.querySelector('.song-actions-section');
   if (existing) existing.remove();
@@ -407,6 +409,13 @@ function updateSongActions(sheet) {
       ${currentOffset !== 0 ? '<button class="transpose-reset" id="sheet-tp-reset" title="Сбросить">↺</button>' : ''}
     </div>
     ${unlocked ? `
+    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.5rem">Исходная тональность</p>
+    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
+      <select id="sheet-key-select" style="flex:1;padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:0.9rem;font-family:inherit;outline:none;cursor:pointer">
+        <option value="">Авто</option>
+        ${KEY_OPTIONS.map(k => `<option value="${k}" ${song.originalKey === k ? 'selected' : ''}>${k}</option>`).join('')}
+      </select>
+    </div>
     <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem">Действия с песней</p>
     <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem">
       <button class="btn btn-secondary" id="sheet-edit" style="flex:1">Редактировать</button>
@@ -440,6 +449,27 @@ function updateSongActions(sheet) {
   }
 
   if (unlocked) {
+    const keySelect = document.getElementById('sheet-key-select');
+    if (keySelect) {
+      keySelect.addEventListener('change', async () => {
+        const newKey = keySelect.value || null;
+        if (newKey) {
+          const currentKey = detectSongKey(song, 0);
+          const oldSemitone = noteToSemitone(currentKey);
+          const newSemitone = noteToSemitone(newKey);
+          if (oldSemitone !== -1 && newSemitone !== -1) {
+            const offset = newSemitone - oldSemitone;
+            song.rawText = transposeSongText(song.rawText, offset);
+          }
+        }
+        song.originalKey = newKey;
+        window._currentTransposeOffset = 0;
+        await saveSong(song);
+        if (window._currentSongRender) window._currentSongRender();
+        updateSongActions(sheet);
+      });
+    }
+
     document.getElementById('sheet-edit').addEventListener('click', () => {
       const overlay = document.getElementById('settings-overlay');
       const sheetEl = document.getElementById('settings-sheet');

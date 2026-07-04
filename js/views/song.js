@@ -61,6 +61,7 @@ async function createSongView(container, songId, settings, requestUnlock, unlock
             <h1>${esc(song.title)}</h1>
             ${song.artist ? `<div class="song-meta">${esc(song.artist)}</div>` : ''}
             ${song.capo ? `<div class="song-meta">Каподастр: ${song.capo}</div>` : ''}
+            ${song.originalKey ? `<div class="song-meta">Тональность: ${esc(song.originalKey)}</div>` : ''}
             ${offset !== 0 ? `<div class="song-meta">Транспозиция: ${offset > 0 ? '+' : ''}${offset} полутонов</div>` : ''}
           </div>
           ${uniqueChords.length > 0 ? `
