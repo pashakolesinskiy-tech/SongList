@@ -13,25 +13,21 @@ const SECTION_NAMES = {
   prechorus: 'ПРЕДПРИПЕВ'
 };
 
+const CHORD_TOKEN_RE = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
+
 function renderChordLine(chordLine) {
-  const CHORD_TOKEN = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
   let html = '';
   let lastIdx = 0;
-
-  for (const m of chordLine.matchAll(CHORD_TOKEN)) {
+  for (const m of chordLine.matchAll(CHORD_TOKEN_RE)) {
     if (m.index > lastIdx) {
-      const spaces = chordLine.substring(lastIdx, m.index);
-      html += spaces.replace(/ /g, '&nbsp;');
+      html += escapeHtml(chordLine.substring(lastIdx, m.index)).replace(/ /g, '&nbsp;');
     }
     html += `<span class="chord">${escapeHtml(m[1])}</span>`;
     lastIdx = m.index + m[0].length;
   }
-
   if (lastIdx < chordLine.length) {
-    const tail = chordLine.substring(lastIdx);
-    html += tail.replace(/ /g, '&nbsp;');
+    html += escapeHtml(chordLine.substring(lastIdx)).replace(/ /g, '&nbsp;');
   }
-
   return html;
 }
 
@@ -41,8 +37,12 @@ function segmentsToChordAbove(segments) {
 
   for (const seg of segments) {
     if (seg.chord) {
-      const textLen = seg.text.length || 1;
-      chordLine += seg.chord + ' '.repeat(Math.max(1, textLen - seg.chord.length + 1));
+      const textLen = seg.text.length;
+      if (textLen > 0) {
+        chordLine += seg.chord + ' '.repeat(Math.max(1, textLen - seg.chord.length));
+      } else {
+        chordLine += seg.chord + ' ';
+      }
       lyricLine += seg.text;
     } else {
       chordLine += ' '.repeat(seg.text.length);
@@ -129,4 +129,42 @@ function renderSong(song, settings) {
   return html;
 }
 
-export { renderSong, renderSegments };
+function alignChords() {
+  document.querySelectorAll('.chord-above-block').forEach(block => {
+    const chordEl = block.querySelector('.chord-line');
+    const lyricEl = block.querySelector('.lyric-line');
+    if (!chordEl || !lyricEl) return;
+
+    const origChordWS = chordEl.style.whiteSpace;
+    const origLyricWS = lyricEl.style.whiteSpace;
+    chordEl.style.whiteSpace = 'nowrap';
+    lyricEl.style.whiteSpace = 'nowrap';
+
+    const chordW = chordEl.offsetWidth;
+    const lyricW = lyricEl.offsetWidth;
+
+    chordEl.style.whiteSpace = origChordWS;
+    lyricEl.style.whiteSpace = origLyricWS;
+
+    if (chordW === lyricW) return;
+
+    const test = document.createElement('span');
+    test.style.whiteSpace = 'nowrap';
+    test.innerHTML = '&nbsp;';
+    block.appendChild(test);
+    const spaceW = test.offsetWidth;
+    block.removeChild(test);
+
+    if (spaceW <= 0) return;
+
+    if (chordW < lyricW) {
+      const n = Math.ceil((lyricW - chordW) / spaceW);
+      chordEl.innerHTML += '&nbsp;'.repeat(n);
+    } else if (lyricW < chordW) {
+      const n = Math.ceil((chordW - lyricW) / spaceW);
+      lyricEl.innerHTML += '&nbsp;'.repeat(n);
+    }
+  });
+}
+
+export { renderSong, renderSegments, alignChords };

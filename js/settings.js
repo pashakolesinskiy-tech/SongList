@@ -7,8 +7,7 @@ let settings = {
   darkTheme: true,
   showNumbers: true,
   showChords: true,
-  fontSize: 16,
-  fontFamily: 'sans'
+  fontSize: 16
 };
 
 try {
@@ -29,13 +28,7 @@ function saveSettings() {
 function applySettings() {
   const root = document.documentElement;
   root.style.setProperty('--song-font-size', settings.fontSize + 'px');
-
-  const fontMap = {
-    sans: 'var(--font-main)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)'
-  };
-  root.style.setProperty('--song-font', fontMap[settings.fontFamily] || fontMap.sans);
+  root.style.setProperty('--song-font', "'Calibri', sans-serif");
 
   if (settings.darkTheme) {
     document.body.classList.remove('light-theme');

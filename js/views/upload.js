@@ -1,5 +1,5 @@
 import { parse, autoDetectAndParse } from '../parser/index.js';
-import { renderSong } from '../renderer/chord-renderer.js';
+import { renderSong, alignChords } from '../renderer/chord-renderer.js';
 import { saveSong } from '../storage/firebase.js';
 
 function createUploadView(container, settings) {
@@ -107,6 +107,7 @@ function createUploadView(container, settings) {
       capo: parseInt(container.querySelector('#song-capo').value) || null,
       sections: parsed.sections
     }, settings);
+    alignChords();
     previewArea.style.display = 'block';
   });
 

@@ -1,6 +1,6 @@
 import { getSong, saveSong } from '../storage/firebase.js';
 import { parse, autoDetectAndParse } from '../parser/index.js';
-import { renderSong } from '../renderer/chord-renderer.js';
+import { renderSong, alignChords } from '../renderer/chord-renderer.js';
 import { transposeSongText, noteToSemitone } from '../utils/transpose.js';
 import { esc } from '../utils/escape.js';
 
@@ -146,6 +146,7 @@ async function createEditView(container, songId, settings) {
         capo: parseInt(container.querySelector('#song-capo').value) || null,
         sections: parsed.sections
       }, settings);
+      alignChords();
       previewArea.style.display = 'block';
     });
 

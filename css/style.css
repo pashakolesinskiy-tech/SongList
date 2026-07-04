@@ -305,7 +305,6 @@ a { color: inherit; text-decoration: none; }
   white-space: pre-wrap;
   word-break: break-word;
   color: var(--accent);
-  font-weight: 700;
 }
 
 .chord-above-block .lyric-line {
@@ -321,7 +320,6 @@ a { color: inherit; text-decoration: none; }
 }
 
 .chord {
-  font-weight: 700;
   color: var(--accent);
 }
 
@@ -390,7 +388,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .form-group textarea {
-  font-family: var(--font-mono);
+  font-family: 'Calibri', sans-serif;
   font-size: 0.85rem;
   resize: vertical;
   min-height: 200px;

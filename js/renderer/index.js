@@ -1,3 +1,3 @@
-import { renderSong, renderSegments } from './chord-renderer.js';
+import { renderSong, renderSegments, alignChords } from './chord-renderer.js';
 
-export { renderSong, renderSegments };
+export { renderSong, renderSegments, alignChords };

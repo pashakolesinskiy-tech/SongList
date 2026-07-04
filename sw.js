@@ -1,4 +1,4 @@
-const CACHE_NAME = 'druisk-v8';
+const CACHE_NAME = 'druisk-v25';
 const ASSETS = [
   '/',
   '/index.html',

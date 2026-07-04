@@ -1,5 +1,5 @@
 import { getSong, deleteSong } from '../storage/firebase.js';
-import { renderSong } from '../renderer/chord-renderer.js';
+import { renderSong, alignChords } from '../renderer/chord-renderer.js';
 import { transposeSongText } from '../utils/transpose.js';
 import { esc } from '../utils/escape.js';
 
@@ -80,6 +80,7 @@ async function createSongView(container, songId, settings, requestUnlock, unlock
         </div>
       `;
 
+      alignChords();
       bindEvents();
     }
 

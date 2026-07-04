@@ -98,23 +98,6 @@ function renderShell() {
           <span class="font-size-val" id="fs-val">${settings.fontSize}</span>
         </div>
       </div>
-      <div style="margin-bottom:1.25rem">
-        <p style="font-size:0.95rem;margin-bottom:0.75rem">Шрифт</p>
-        <div class="font-family-row">
-          <button class="font-family-btn ${settings.fontFamily === 'sans' ? 'active' : ''}" data-font="sans">
-            <span class="preview" style="font-family:var(--font-main)">Aa</span>
-            <span class="label">Обычный</span>
-          </button>
-          <button class="font-family-btn ${settings.fontFamily === 'serif' ? 'active' : ''}" data-font="serif">
-            <span class="preview" style="font-family:var(--font-serif)">Aa</span>
-            <span class="label">Засечки</span>
-          </button>
-          <button class="font-family-btn ${settings.fontFamily === 'rounded' ? 'active' : ''}" data-font="rounded">
-            <span class="preview" style="font-family:var(--font-rounded)">Aa</span>
-            <span class="label">Округлый</span>
-          </button>
-        </div>
-      </div>
       ${unlocked ? `
       <div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-bottom:0.75rem">
         <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem">Облачная синхронизация (опционально)</p>
@@ -196,15 +179,6 @@ function renderShell() {
     document.getElementById('fs-slider').value = settings.fontSize;
     document.getElementById('fs-val').textContent = settings.fontSize;
     saveSettings();
-  });
-
-  document.querySelectorAll('.font-family-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      settings.fontFamily = btn.dataset.font;
-      document.querySelectorAll('.font-family-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      saveSettings();
-    });
   });
 
   const urlEl = document.getElementById('cfg-url');
