@@ -168,7 +168,8 @@ a { color: inherit; text-decoration: none; }
   background: none !important;
   border: none;
   color: var(--text-secondary);
-  font-size: 1.1rem;
+  font-size: 1.4rem;
+  line-height: 1;
   cursor: pointer;
   padding: 0.25rem;
   transition: color 0.15s, transform 0.15s;

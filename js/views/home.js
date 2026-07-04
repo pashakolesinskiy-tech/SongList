@@ -251,7 +251,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
               ${song.artist ? `<div class="song-artist-sub">${esc(song.artist)}</div>` : ''}
             </div>
             <div class="song-actions">
-              <button class="btn-fav js-fav ${favs.includes(song.id) ? 'is-fav' : ''}" data-id="${song.id}" title="Избранное">♥</button>
+              <button class="btn-fav js-fav ${favs.includes(song.id) ? 'is-fav' : ''}" data-id="${song.id}" title="Избранное" tabindex="-1">♥</button>
               ${unlocked ? `<button class="btn btn-danger btn-sm js-delete" data-id="${song.id}">✕</button>` : ''}
             </div>
           </div>
@@ -268,6 +268,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
         const id = btn.dataset.id;
         const isFav = toggleFavorite(id);
         btn.classList.toggle('is-fav', isFav);
+        btn.blur();
         if (showFavsOnly && !isFav) {
           renderList(getVisibleSongs());
         }
