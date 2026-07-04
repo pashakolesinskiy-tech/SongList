@@ -1,11 +1,11 @@
-const INLINE_CHORD_REGEX = /\[([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)\]/g;
-const CHORD_LINE_REGEX = /^([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?\s*)+$/;
-const CHORD_TOKEN_REGEX = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
+const INLINE_CHORD_REGEX = /\[([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)\]/g;
+const CHORD_LINE_REGEX = /^([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?\s*)+$/;
+const CHORD_TOKEN_REGEX = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
 const SECTION_LABEL_REGEX = /^\[(verse|chorus|bridge|intro|outro|prechorus|pre-chorus)(?:\s+(.+))?\]$/i;
 
 function detectFormat(text) {
-  if (/\{[A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?\d*\}/.test(text)) return 'chordpro';
-  if (/\[[A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?\d*\]/.test(text)) return 'plain-inline';
+  if (/\{[A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?\d*\}/.test(text)) return 'chordpro';
+  if (/\[[A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?\d*\]/.test(text)) return 'plain-inline';
   return 'plain-above';
 }
 

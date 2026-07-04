@@ -1,4 +1,4 @@
-const CHORD_REGEX = /\{([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)\}/g;
+const CHORD_REGEX = /\{([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)\}/g;
 const SECTION_REGEX = /^\[(verse|chorus|bridge|intro|outro|prechorus|pre-chorus)(?:\s+(.+))?\]$/i;
 const CHORDPRO_SECTION_REGEX = /^\{(start_of_verse|start_of_chorus|start_of_bridge|start_of_intro|start_of_outro|start_of_prechorus|verse|chorus|bridge|intro|outro|prechorus)(?::\s*(.+))?\}$/i;
 const SECTION_END_REGEX = /^\{(end_of_verse|end_of_chorus|end_of_bridge|end_of_intro|end_of_outro|end_of_prechorus)\}$/i;

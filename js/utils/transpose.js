@@ -2,6 +2,7 @@ const SHARP_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#',
 const FLAT_NOTES  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
 
 function noteToSemitone(note) {
+  if (note === 'H') return 11;
   const idx = SHARP_NOTES.indexOf(note);
   if (idx !== -1) return idx;
   return FLAT_NOTES.indexOf(note);
@@ -15,7 +16,7 @@ function semitoneToNote(s, preferFlat) {
 function transposeChord(chord, offset) {
   if (offset === 0) return chord;
 
-  const m = chord.match(/^([A-G][#b]?)(.*)/);
+  const m = chord.match(/^([A-H][#b]?)(.*)/);
   if (!m) return chord;
 
   const root = m[1];
@@ -26,7 +27,7 @@ function transposeChord(chord, offset) {
 
   const newRoot = semitoneToNote(s + offset, preferFlat);
 
-  const slash = rest.match(/^(.*?)(\/)([A-G][#b]?)$/);
+  const slash = rest.match(/^(.*?)(\/)([A-H][#b]?)$/);
   if (slash) {
     const bassPreferFlat = slash[3].includes('b');
     const bs = noteToSemitone(slash[3]);
@@ -39,7 +40,7 @@ function transposeChord(chord, offset) {
 
 function transposeSongText(text, offset) {
   if (offset === 0) return text;
-  const CHORD_RE = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
+  const CHORD_RE = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
   return text.replace(CHORD_RE, (chord) => transposeChord(chord, offset));
 }
 
