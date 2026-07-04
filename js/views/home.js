@@ -115,6 +115,15 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
     }, 200);
   });
 
+  function stripChords(text) {
+    return text
+      .replace(/\{[^}]*\}/g, '')
+      .replace(/\[[^\]]*\]/g, '')
+      .replace(/^([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?\s*)+$/gm, '')
+      .replace(/[A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?/g, '')
+      .replace(/\s{2,}/g, ' ');
+  }
+
   function searchSongs(songs, query) {
     const lowerQuery = query.toLowerCase();
     const results = [];
@@ -127,9 +136,10 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
       if (song.rawText) {
         const lines = song.rawText.split('\n');
         for (const line of lines) {
-          if (line.toLowerCase().includes(lowerQuery)) {
-            const trimmed = line.trim();
-            if (trimmed) matchingLines.push(trimmed);
+          const stripped = stripChords(line).trim();
+          if (!stripped) continue;
+          if (stripped.toLowerCase().includes(lowerQuery)) {
+            matchingLines.push(stripped);
           }
         }
       }
