@@ -15,6 +15,10 @@ function init(config) {
   }
 }
 
+function isOnline() {
+  return navigator.onLine;
+}
+
 function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
@@ -34,7 +38,7 @@ async function saveSong(song) {
     createdAt: existing ? existing.createdAt : new Date().toISOString()
   };
 
-  if (isConfigured && supabase) {
+  if (isConfigured && supabase && isOnline()) {
     try {
       const { data, error } = await supabase
         .from('songs')
@@ -55,7 +59,7 @@ async function saveSong(song) {
 }
 
 async function getSongs() {
-  if (isConfigured && supabase) {
+  if (isConfigured && supabase && isOnline()) {
     try {
       const { data, error } = await supabase
         .from('songs')
@@ -75,7 +79,7 @@ async function getSongs() {
 }
 
 async function getSong(id) {
-  if (isConfigured && supabase) {
+  if (isConfigured && supabase && isOnline()) {
     try {
       const { data, error } = await supabase
         .from('songs')
@@ -94,7 +98,7 @@ async function getSong(id) {
 }
 
 async function deleteSong(id) {
-  if (isConfigured && supabase) {
+  if (isConfigured && supabase && isOnline()) {
     try {
       const { error } = await supabase
         .from('songs')
