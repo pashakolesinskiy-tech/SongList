@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f0f0f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <title>Druisk</title>
+  <title>Друйск</title>
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
@@ -21,6 +21,53 @@
   <div id="app"></div>
   <script type="module" src="js/app.js"></script>
   <script>
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      setTimeout(() => {
+        if (localStorage.getItem('druisk-install-dismissed')) return;
+
+        const banner = document.createElement('div');
+        banner.className = 'install-banner';
+        banner.innerHTML = `
+          <div class="install-icon"><img src="icons/icon-96.png" alt="Druisk"></div>
+          <div class="install-text">
+            <p class="install-title">Установить Druisk</p>
+            <p class="install-sub">Быстрый доступ к песням с главного экрана</p>
+          </div>
+          <div class="install-actions">
+            <button id="install-ok" class="btn btn-primary btn-sm">Установить</button>
+            <button id="install-dismiss" class="btn btn-secondary btn-sm">Позже</button>
+          </div>
+        `;
+        document.body.appendChild(banner);
+
+        document.getElementById('install-ok').addEventListener('click', () => {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(choice => {
+            if (choice.outcome === 'accepted') {
+              banner.remove();
+            }
+            deferredPrompt = null;
+          });
+        });
+
+        document.getElementById('install-dismiss').addEventListener('click', () => {
+          localStorage.setItem('druisk-install-dismissed', '1');
+          banner.remove();
+        });
+      }, 3000);
+    });
+
+    window.addEventListener('appinstalled', () => {
+      deferredPrompt = null;
+      const banner = document.querySelector('.install-banner');
+      if (banner) banner.remove();
+    });
+
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(reg => {
         reg.addEventListener('updatefound', () => {
