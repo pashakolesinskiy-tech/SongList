@@ -170,7 +170,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const id = e.target.dataset.id;
+        const id = e.currentTarget.dataset.id;
         requestUnlock(async () => {
           if (await window.showConfirm('Удалить эту песню?')) {
             await deleteSong(id);
@@ -224,9 +224,9 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const id = e.target.dataset.id;
+        const id = e.currentTarget.dataset.id;
         const isFav = toggleFavorite(id);
-        e.target.classList.toggle('is-fav', isFav);
+        e.currentTarget.classList.toggle('is-fav', isFav);
         if (showFavsOnly && !isFav) {
           renderList(getVisibleSongs());
         }
@@ -237,7 +237,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const id = e.target.dataset.id;
+        const id = e.currentTarget.dataset.id;
         requestUnlock(async () => {
           if (await window.showConfirm('Удалить эту песню?')) {
             await deleteSong(id);

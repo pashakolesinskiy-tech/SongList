@@ -163,6 +163,8 @@ a { color: inherit; text-decoration: none; }
   cursor: pointer;
   padding: 0.25rem;
   transition: color 0.2s, transform 0.15s;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-fav:hover {
