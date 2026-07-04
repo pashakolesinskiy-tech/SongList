@@ -1,4 +1,4 @@
-const CACHE_NAME = 'druisk-v7';
+const CACHE_NAME = 'druisk-v8';
 const ASSETS = [
   '/',
   '/index.html',
@@ -53,6 +53,11 @@ self.addEventListener('fetch', (e) => {
 
   // Never cache Google Fonts requests
   if (url.hostname.includes('fonts')) {
+    return;
+  }
+
+  // Only cache GET requests (Cache API doesn't support POST/PUT/DELETE)
+  if (e.request.method !== 'GET') {
     return;
   }
 
