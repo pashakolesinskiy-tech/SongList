@@ -1,4 +1,4 @@
-const CACHE_NAME = 'druisk-v3';
+const CACHE_NAME = 'druisk-v4';
 const ASSETS = [
   '/',
   '/index.html',
@@ -19,7 +19,9 @@ const ASSETS = [
   '/js/views/song.js',
   '/js/views/upload.js',
   '/js/views/edit.js',
-  '/manifest.json'
+  '/manifest.json',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
