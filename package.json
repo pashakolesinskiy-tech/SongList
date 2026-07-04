@@ -1,0 +1,11 @@
+{
+  "name": "chord-viewer",
+  "version": "1.0.0",
+  "description": "Тексты песен с аккордами",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx serve . -l 3000"
+  },
+  "keywords": ["chords", "lyrics", "songs"],
+  "license": "MIT"
+}
