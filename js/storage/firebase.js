@@ -27,6 +27,7 @@ async function saveSong(song) {
     artist: song.artist,
     capo: song.capo || null,
     tuning: song.tuning || 'standard',
+    originalKey: song.originalKey || null,
     rawText: song.rawText,
     format: song.format,
     parsedData: song.parsedData,
@@ -34,14 +35,18 @@ async function saveSong(song) {
   };
 
   if (isConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('songs')
-      .upsert(record)
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('songs')
+        .upsert(record)
+        .select()
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (e) {
+      console.warn('Supabase save failed, using localStorage:', e.message);
+    }
   }
 
   return saveToLocalStorage(record);
@@ -49,13 +54,17 @@ async function saveSong(song) {
 
 async function getSongs() {
   if (isConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('songs')
-      .select('*')
-      .order('createdAt', { ascending: false });
+    try {
+      const { data, error } = await supabase
+        .from('songs')
+        .select('*')
+        .order('createdAt', { ascending: false });
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (e) {
+      console.warn('Supabase fetch failed, using localStorage:', e.message);
+    }
   }
 
   return getFromLocalStorage();
@@ -63,14 +72,18 @@ async function getSongs() {
 
 async function getSong(id) {
   if (isConfigured && supabase) {
-    const { data, error } = await supabase
-      .from('songs')
-      .select('*')
-      .eq('id', id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('songs')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-    if (error) throw error;
-    return data;
+      if (error) throw error;
+      return data;
+    } catch (e) {
+      console.warn('Supabase fetch failed, using localStorage:', e.message);
+    }
   }
 
   return getFromLocalStorage().find(s => s.id === id) || null;
@@ -78,13 +91,17 @@ async function getSong(id) {
 
 async function deleteSong(id) {
   if (isConfigured && supabase) {
-    const { error } = await supabase
-      .from('songs')
-      .delete()
-      .eq('id', id);
+    try {
+      const { error } = await supabase
+        .from('songs')
+        .delete()
+        .eq('id', id);
 
-    if (error) throw error;
-    return true;
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.warn('Supabase delete failed, using localStorage:', e.message);
+    }
   }
 
   return deleteFromLocalStorage(id);

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'druisk-v1';
+const CACHE_NAME = 'druisk-v2';
 const ASSETS = [
   '/',
   '/index.html',
@@ -19,9 +19,7 @@ const ASSETS = [
   '/js/views/song.js',
   '/js/views/upload.js',
   '/js/views/edit.js',
-  '/manifest.json',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/manifest.json'
 ];
 
 self.addEventListener('install', (e) => {
@@ -41,8 +39,24 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
-  if (e.request.url.includes('supabase')) return;
+  const url = new URL(e.request.url);
+
+  // Never cache Supabase or Google Fonts requests
+  if (url.hostname.includes('supabase') || url.hostname.includes('fonts')) {
+    return;
+  }
+
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(cached => {
+      const fetched = fetch(e.request).then(response => {
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
+        }
+        return response;
+      }).catch(() => cached);
+
+      return cached || fetched;
+    })
   );
 });
