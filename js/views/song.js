@@ -83,7 +83,7 @@ async function createSongView(container, songId, settings, requestUnlock, unlock
     }
 
     function extractChords(text) {
-      const CHORD_RE = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
+      const CHORD_RE = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
       const chords = [];
       for (const line of text.split('\n')) {
         for (const m of line.matchAll(CHORD_RE)) {

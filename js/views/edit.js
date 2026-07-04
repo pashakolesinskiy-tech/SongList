@@ -89,12 +89,15 @@ async function createEditView(container, songId, settings) {
       const text = textarea.value.trim();
       if (!text) return;
 
-      const CHORD_RE = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
+      const CHORD_RE = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
       const counts = {};
       for (const line of text.split('\n')) {
         for (const m of line.matchAll(CHORD_RE)) {
-          const root = m[1];
-          counts[root] = (counts[root] || 0) + 1;
+          const rootMatch = m[1].match(/^([A-G][#b]?)/);
+          if (rootMatch) {
+            const root = rootMatch[1];
+            counts[root] = (counts[root] || 0) + 1;
+          }
         }
       }
       let maxCount = 0;

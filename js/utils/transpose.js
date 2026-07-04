@@ -39,7 +39,7 @@ function transposeChord(chord, offset) {
 
 function transposeSongText(text, offset) {
   if (offset === 0) return text;
-  const CHORD_RE = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
+  const CHORD_RE = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
   return text.replace(CHORD_RE, (chord) => transposeChord(chord, offset));
 }
 

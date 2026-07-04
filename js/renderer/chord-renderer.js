@@ -14,7 +14,7 @@ const SECTION_NAMES = {
 };
 
 function renderChordLine(chordLine) {
-  const CHORD_TOKEN = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
+  const CHORD_TOKEN = /([A-G][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-G][#b]?)?(?:\d+)?)/g;
   let html = '';
   let lastIdx = 0;
 
