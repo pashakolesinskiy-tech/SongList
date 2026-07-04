@@ -38,12 +38,12 @@ async function saveSong(song) {
     try {
       const { data, error } = await supabase
         .from('songs')
-        .upsert(record)
+        .upsert(mapToDb(record))
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return mapFromDb(data);
     } catch (e) {
       console.warn('Supabase save failed, using localStorage:', e.message);
     }
@@ -61,7 +61,7 @@ async function getSongs() {
         .order('createdAt', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data.map(mapFromDb);
     } catch (e) {
       console.warn('Supabase fetch failed, using localStorage:', e.message);
     }
@@ -80,7 +80,7 @@ async function getSong(id) {
         .single();
 
       if (error) throw error;
-      return data;
+      return mapFromDb(data);
     } catch (e) {
       console.warn('Supabase fetch failed, using localStorage:', e.message);
     }
@@ -135,6 +135,22 @@ function deleteFromLocalStorage(id) {
 
 function getIsConfigured() {
   return isConfigured;
+}
+
+function mapFromDb(song) {
+  if (!song) return song;
+  return {
+    ...song,
+    originalKey: song.originalkey || song.originalKey || null
+  };
+}
+
+function mapToDb(song) {
+  const { originalKey, ...rest } = song;
+  return {
+    ...rest,
+    originalkey: originalKey || null
+  };
 }
 
 export { init, saveSong, getSongs, getSong, deleteSong, getIsConfigured };
