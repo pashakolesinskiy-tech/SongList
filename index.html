@@ -20,7 +20,27 @@
   <script type="module" src="js/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js');
+      navigator.serviceWorker.register('/sw.js').then(reg => {
+        reg.addEventListener('updatefound', () => {
+          const newSW = reg.installing;
+          newSW.addEventListener('statechange', () => {
+            if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
+              const toast = document.createElement('div');
+              toast.className = 'update-toast';
+              toast.innerHTML = '<span>Доступно обновление</span><button id="update-ok">Обновить</button>';
+              document.body.appendChild(toast);
+              document.getElementById('update-ok').addEventListener('click', () => {
+                newSW.postMessage({ type: 'SKIP_WAITING' });
+                toast.remove();
+                window.location.reload();
+              });
+            }
+          });
+        });
+      });
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
     }
   </script>
 </body>

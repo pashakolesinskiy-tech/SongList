@@ -1,4 +1,4 @@
-const CACHE_NAME = 'druisk-v2';
+const CACHE_NAME = 'druisk-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -36,6 +36,12 @@ self.addEventListener('activate', (e) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('fetch', (e) => {
