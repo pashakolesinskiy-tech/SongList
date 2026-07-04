@@ -30,11 +30,11 @@ function parseChordProLine(line) {
 
 function detectSectionType(name) {
   const lower = (name || '').toLowerCase();
+  if (lower.includes('pre-chorus') || lower.includes('prechorus') || lower.includes('предприпев')) return 'prechorus';
   if (lower.includes('chorus') || lower.includes('припев')) return 'chorus';
   if (lower.includes('bridge') || lower.includes('бридж')) return 'bridge';
   if (lower.includes('intro')) return 'intro';
   if (lower.includes('outro')) return 'outro';
-  if (lower.includes('pre-chorus') || lower.includes('prechorus') || lower.includes('предприпев')) return 'prechorus';
   return 'verse';
 }
 
