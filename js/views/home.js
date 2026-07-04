@@ -167,6 +167,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
     `).join('')}</ul>`;
 
     listEl.querySelectorAll('.js-delete').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => e.preventDefault());
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -221,6 +222,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
     `).join('')}</ul>`;
 
     listEl.querySelectorAll('.js-fav').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => e.preventDefault());
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -228,7 +230,6 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
         const id = btn.dataset.id;
         const isFav = toggleFavorite(id);
         btn.classList.toggle('is-fav', isFav);
-        btn.blur();
         if (showFavsOnly && !isFav) {
           renderList(getVisibleSongs());
         }
@@ -236,6 +237,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
     });
 
     listEl.querySelectorAll('.js-delete').forEach(btn => {
+      btn.addEventListener('mousedown', (e) => e.preventDefault());
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();

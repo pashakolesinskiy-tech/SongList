@@ -156,7 +156,7 @@ a { color: inherit; text-decoration: none; }
 }
 
 .btn-fav {
-  background: none;
+  background: none !important;
   border: none;
   color: var(--text-secondary);
   font-size: 1.1rem;
@@ -165,7 +165,7 @@ a { color: inherit; text-decoration: none; }
   transition: color 0.15s, transform 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
-  outline: none;
+  outline: none !important;
 }
 
 .btn-fav:hover {
@@ -182,8 +182,11 @@ a { color: inherit; text-decoration: none; }
 }
 
 .btn-fav:focus,
-.btn-fav:focus-visible {
-  outline: none;
+.btn-fav:focus-visible,
+.btn-fav:focus-within {
+  outline: none !important;
+  background: none !important;
+  box-shadow: none !important;
 }
 
 /* Song list */
