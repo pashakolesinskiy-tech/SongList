@@ -1,28 +1,5 @@
 import { getSongs, deleteSong } from '../storage/firebase.js';
-
-function getFavorites() {
-  try {
-    return JSON.parse(localStorage.getItem('druisk-favorites') || '[]');
-  } catch {
-    return [];
-  }
-}
-
-function saveFavorites(favs) {
-  localStorage.setItem('druisk-favorites', JSON.stringify(favs));
-}
-
-function toggleFavorite(songId) {
-  const favs = getFavorites();
-  const idx = favs.indexOf(songId);
-  if (idx >= 0) {
-    favs.splice(idx, 1);
-  } else {
-    favs.push(songId);
-  }
-  saveFavorites(favs);
-  return idx < 0;
-}
+import { getFavorites, toggleFavorite } from './favorites.js';
 
 async function createHomeView(container, settings, requestUnlock, unlocked) {
   container.innerHTML = `
@@ -36,7 +13,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
         <option value="title">По названию</option>
         <option value="artist">По исполнителю</option>
       </select>
-      <button class="btn btn-secondary btn-sm" id="btn-favs" style="white-space:nowrap">★ Избранное</button>
+      <button class="btn btn-secondary btn-sm" id="btn-favs" style="white-space:nowrap">♥ Избранное</button>
     </div>
     <div id="songs-list"><div class="loading">Загрузка...</div></div>
   `;
@@ -77,7 +54,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
   favsBtn.addEventListener('click', () => {
     showFavsOnly = !showFavsOnly;
     favsBtn.className = showFavsOnly ? 'btn btn-primary btn-sm' : 'btn btn-secondary btn-sm';
-    favsBtn.textContent = showFavsOnly ? '★ Все песни' : '★ Избранное';
+    favsBtn.textContent = showFavsOnly ? '♥ Все песни' : '♥ Избранное';
     const q = searchInput.value.trim();
     if (q) {
       const results = searchSongs(getVisibleSongs(), q);
@@ -235,7 +212,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
               ${song.artist ? `<div class="song-artist-sub">${esc(song.artist)}</div>` : ''}
             </div>
             <div class="song-actions">
-              <button class="btn-fav js-fav" data-id="${song.id}" title="Избранное">${favs.includes(song.id) ? '★' : '☆'}</button>
+              <button class="btn-fav js-fav ${favs.includes(song.id) ? 'is-fav' : ''}" data-id="${song.id}" title="Избранное">♥</button>
               ${unlocked ? `<button class="btn btn-danger btn-sm js-delete" data-id="${song.id}">✕</button>` : ''}
             </div>
           </div>
@@ -249,7 +226,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
         e.stopPropagation();
         const id = e.target.dataset.id;
         const isFav = toggleFavorite(id);
-        e.target.textContent = isFav ? '★' : '☆';
+        e.target.classList.toggle('is-fav', isFav);
         if (showFavsOnly && !isFav) {
           renderList(getVisibleSongs());
         }

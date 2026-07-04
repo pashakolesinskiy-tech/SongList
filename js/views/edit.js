@@ -1,6 +1,9 @@
 import { getSong, saveSong } from '../storage/firebase.js';
 import { parse, autoDetectAndParse } from '../parser/index.js';
 import { renderSong } from '../renderer/chord-renderer.js';
+import { transposeSongText, noteToSemitone } from '../utils/transpose.js';
+
+const KEY_OPTIONS = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'];
 
 async function createEditView(container, songId, settings) {
   container.innerHTML = '<div class="loading">Загрузка...</div>';
@@ -49,6 +52,16 @@ async function createEditView(container, songId, settings) {
             </div>
           </div>
           <div class="form-group">
+            <label for="song-original-key">Исходная тональность</label>
+            <div style="display:flex;gap:0.5rem;align-items:center">
+              <select id="song-original-key" style="flex:1;padding:0.65rem 0.85rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-size:0.95rem;font-family:inherit;outline:none;cursor:pointer">
+                <option value="">Авто</option>
+                ${KEY_OPTIONS.map(k => `<option value="${k}" ${song.originalKey === k ? 'selected' : ''}>${k}</option>`).join('')}
+              </select>
+              <button type="button" id="btn-apply-key" class="btn btn-secondary btn-sm" style="white-space:nowrap">Применить</button>
+            </div>
+          </div>
+          <div class="form-group">
             <label for="song-text">Текст песни с аккордами</label>
             <textarea id="song-text" rows="14" required>${esc(song.rawText)}</textarea>
           </div>
@@ -66,8 +79,43 @@ async function createEditView(container, songId, settings) {
 
     const form = container.querySelector('#edit-form');
     const textarea = container.querySelector('#song-text');
+    const keySelect = container.querySelector('#song-original-key');
     const previewArea = container.querySelector('#preview-area');
     const previewContent = container.querySelector('#preview-content');
+
+    container.querySelector('#btn-apply-key').addEventListener('click', () => {
+      const newKey = keySelect.value;
+      if (!newKey) return;
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      const CHORD_RE = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
+      const counts = {};
+      for (const line of text.split('\n')) {
+        for (const m of line.matchAll(CHORD_RE)) {
+          const root = m[1];
+          counts[root] = (counts[root] || 0) + 1;
+        }
+      }
+      let maxCount = 0;
+      let currentKey = '';
+      for (const [note, count] of Object.entries(counts)) {
+        if (count > maxCount) {
+          maxCount = count;
+          currentKey = note;
+        }
+      }
+      if (!currentKey) return;
+
+      const rootMatch = currentKey.match(/^([A-G][#b]?)/);
+      const root = rootMatch ? rootMatch[1] : currentKey;
+      const oldSemitone = noteToSemitone(root);
+      const newSemitone = noteToSemitone(newKey);
+      if (oldSemitone === -1 || newSemitone === -1) return;
+
+      const offset = newSemitone - oldSemitone;
+      textarea.value = transposeSongText(text, offset);
+    });
 
     container.querySelector('#btn-preview').addEventListener('click', () => {
       const text = textarea.value.trim();
@@ -99,6 +147,7 @@ async function createEditView(container, songId, settings) {
           title: container.querySelector('#song-title').value,
           artist: container.querySelector('#song-artist').value,
           capo: parseInt(container.querySelector('#song-capo').value) || null,
+          originalKey: keySelect.value || null,
           rawText: text,
           format: detected,
           parsedData: parsed

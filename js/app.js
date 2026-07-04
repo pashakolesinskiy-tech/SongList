@@ -1,13 +1,15 @@
-import { init as initStorage, deleteSong, saveSong } from './storage/firebase.js';
+import { init as initStorage } from './storage/firebase.js';
 import { createHomeView } from './views/home.js';
 import { createUploadView } from './views/upload.js';
 import { createSongView } from './views/song.js';
 import { createEditView } from './views/edit.js';
 import { parse } from './parser/index.js';
-import { transposeSongText, transposeChord, noteToSemitone } from './utils/transpose.js';
+import { transposeSongText, transposeChord } from './utils/transpose.js';
+import { config, settings, saveSettings } from './settings.js';
+import { unlocked, requestUnlock, lockApp } from './lock.js';
+import { updateSongActions } from './song-actions.js';
 
 const appEl = document.getElementById('app');
-const LOCK_CODE = '080826';
 
 window._parseModule = { parse };
 window._transposeModule = { transposeSongText, transposeChord };
@@ -45,143 +47,10 @@ function showConfirm(message) {
   });
 }
 
-const config = {
-  url: 'https://zepofyjklltfdxxomvku.supabase.co',
-  anonKey: 'sb_publishable_JJILkEwxTpf1GvkvUOv5sA_A6Nlk-gb'
-};
-
-let settings = {
-  darkTheme: true,
-  showNumbers: true,
-  showChords: true,
-  fontSize: 16,
-  fontFamily: 'sans'
-};
-
-let unlocked = localStorage.getItem('druisk-unlocked') === 'true';
-
-try {
-  const saved = localStorage.getItem('chord-viewer-config');
-  if (saved) Object.assign(config, JSON.parse(saved));
-} catch {}
-
-try {
-  const savedSettings = localStorage.getItem('druisk-settings');
-  if (savedSettings) Object.assign(settings, JSON.parse(savedSettings));
-} catch {}
-
-initStorage(config);
-
-function saveSettings() {
-  localStorage.setItem('druisk-settings', JSON.stringify(settings));
-  applySettings();
-}
-
-function applySettings() {
-  const root = document.documentElement;
-  root.style.setProperty('--song-font-size', settings.fontSize + 'px');
-
-  const fontMap = {
-    sans: 'var(--font-main)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)'
-  };
-  root.style.setProperty('--song-font', fontMap[settings.fontFamily] || fontMap.sans);
-
-  if (settings.darkTheme) {
-    document.body.classList.remove('light-theme');
-  } else {
-    document.body.classList.add('light-theme');
-  }
-}
-
-applySettings();
-
 function parseHash() {
   const hash = window.location.hash || '#/';
   const parts = hash.slice(2).split('/');
   return { path: parts[0] || '', param: parts[1] || null };
-}
-
-let pendingAction = null;
-
-function requestUnlock(callback) {
-  if (unlocked) {
-    callback();
-    return;
-  }
-  pendingAction = callback;
-  showLockModal();
-}
-
-function showLockModal() {
-  const existing = document.getElementById('lock-modal');
-  if (existing) existing.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id = 'lock-modal';
-  overlay.className = 'settings-overlay open';
-  overlay.innerHTML = `
-    <div class="settings-sheet open" style="max-width:360px;text-align:center">
-      <div class="settings-handle"></div>
-      <div style="font-size:2rem;margin-bottom:0.5rem">🔒</div>
-      <h2 style="margin-bottom:0.5rem">Введите код</h2>
-      <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:1.25rem">Для добавления и удаления песен</p>
-      <input type="password" id="lock-input" maxlength="6" inputmode="numeric" pattern="[0-9]*"
-        style="width:100%;padding:0.75rem;text-align:center;font-size:1.5rem;letter-spacing:0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text-primary);font-family:var(--font-mono);outline:none;margin-bottom:1rem"
-        placeholder="------">
-      <div id="lock-error" style="color:#ef4444;font-size:0.85rem;margin-bottom:1rem;display:none">Неверный код</div>
-      <div style="display:flex;gap:0.75rem">
-        <button class="btn btn-secondary" id="lock-cancel" style="flex:1">Отмена</button>
-        <button class="btn btn-primary" id="lock-ok" style="flex:1">Войти</button>
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(overlay);
-
-  const input = document.getElementById('lock-input');
-  const error = document.getElementById('lock-error');
-  input.focus();
-
-  function tryUnlock() {
-    if (input.value === LOCK_CODE) {
-      unlocked = true;
-      localStorage.setItem('druisk-unlocked', 'true');
-      overlay.remove();
-      if (pendingAction) {
-        pendingAction();
-        pendingAction = null;
-      }
-    } else {
-      error.style.display = 'block';
-      input.value = '';
-      input.focus();
-    }
-  }
-
-  document.getElementById('lock-ok').addEventListener('click', tryUnlock);
-  input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') tryUnlock();
-    error.style.display = 'none';
-  });
-  document.getElementById('lock-cancel').addEventListener('click', () => {
-    overlay.remove();
-    pendingAction = null;
-  });
-  overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) {
-      overlay.remove();
-      pendingAction = null;
-    }
-  });
-}
-
-function lockApp() {
-  unlocked = false;
-  localStorage.setItem('druisk-unlocked', 'false');
-  renderShell();
-  navigate();
 }
 
 function renderShell() {
@@ -277,6 +146,8 @@ function renderShell() {
     lockBtn.addEventListener('click', () => {
       if (unlocked) {
         lockApp();
+        renderShell();
+        navigate();
       } else {
         requestUnlock(() => {
           renderShell();
@@ -360,153 +231,6 @@ function toggleSettings() {
   }
 }
 
-function detectSongKey(song, offset) {
-  if (!song || !song.rawText) return '—';
-  const { transposeSongText } = window._transposeModule || {};
-  const text = transposeSongText ? transposeSongText(song.rawText, offset || 0) : song.rawText;
-  const CHORD_RE = /([A-H][#b]?(?:maj|min|dim|aug|sus[24]?|add\d+)?m?(?:\/[A-H][#b]?)?(?:\d+)?)/g;
-  const counts = {};
-  for (const line of text.split('\n')) {
-    for (const m of line.matchAll(CHORD_RE)) {
-      const root = m[1];
-      counts[root] = (counts[root] || 0) + 1;
-    }
-  }
-  let maxCount = 0;
-  let key = '—';
-  for (const [note, count] of Object.entries(counts)) {
-    if (count > maxCount) {
-      maxCount = count;
-      key = note;
-    }
-  }
-  return key;
-}
-
-const KEY_OPTIONS = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'];
-
-function updateSongActions(sheet) {
-  const existing = sheet.querySelector('.song-actions-section');
-  if (existing) existing.remove();
-
-  if (!window._currentSongId) return;
-
-  const songId = window._currentSongId;
-  const requestUnlock = window._currentSongRequestUnlock;
-  const song = window._currentSongData;
-  const currentOffset = window._currentTransposeOffset || 0;
-  const key = detectSongKey(song, currentOffset);
-
-  const section = document.createElement('div');
-  section.className = 'song-actions-section';
-  section.style.cssText = 'border-top:1px solid var(--border);padding-top:1.25rem;margin-top:1.25rem';
-  section.innerHTML = `
-    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem">Тон</p>
-    <div style="display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-bottom:1rem">
-      <button class="transpose-btn" id="sheet-tp-down" title="Вниз">−</button>
-      <span class="transpose-display">${key}${currentOffset !== 0 ? `<span class="transpose-offset">${currentOffset > 0 ? '+' : ''}${currentOffset}</span>` : ''}</span>
-      <button class="transpose-btn" id="sheet-tp-up" title="Вверх">+</button>
-      ${currentOffset !== 0 ? '<button class="transpose-reset" id="sheet-tp-reset" title="Сбросить">↺</button>' : ''}
-    </div>
-    ${unlocked ? `
-    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.5rem">Исходная тональность</p>
-    <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem">
-      <select id="sheet-key-select" style="flex:1;padding:0.5rem 0.75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:0.9rem;font-family:inherit;outline:none;cursor:pointer">
-        <option value="">Авто</option>
-        ${KEY_OPTIONS.map(k => `<option value="${k}" ${song.originalKey === k ? 'selected' : ''}>${k}</option>`).join('')}
-      </select>
-    </div>
-    <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem">Действия с песней</p>
-    <div style="display:flex;gap:0.75rem;margin-bottom:0.75rem">
-      <button class="btn btn-secondary" id="sheet-edit" style="flex:1">Редактировать</button>
-      <button class="btn btn-danger" id="sheet-delete" style="flex:1">Удалить</button>
-    </div>
-    <button class="btn btn-secondary" id="sheet-export" style="width:100%">📥 Скачать как текст</button>
-    ` : ''}
-  `;
-
-  sheet.appendChild(section);
-
-  document.getElementById('sheet-tp-up').addEventListener('click', () => {
-    window._currentTransposeOffset = (window._currentTransposeOffset || 0) + 1;
-    if (window._currentSongRender) window._currentSongRender();
-    updateSongActions(sheet);
-  });
-
-  document.getElementById('sheet-tp-down').addEventListener('click', () => {
-    window._currentTransposeOffset = (window._currentTransposeOffset || 0) - 1;
-    if (window._currentSongRender) window._currentSongRender();
-    updateSongActions(sheet);
-  });
-
-  const tpReset = document.getElementById('sheet-tp-reset');
-  if (tpReset) {
-    tpReset.addEventListener('click', () => {
-      window._currentTransposeOffset = 0;
-      if (window._currentSongRender) window._currentSongRender();
-      updateSongActions(sheet);
-    });
-  }
-
-  if (unlocked) {
-    const keySelect = document.getElementById('sheet-key-select');
-    if (keySelect) {
-      keySelect.addEventListener('change', async () => {
-        const newKey = keySelect.value || null;
-        if (newKey) {
-          const currentKey = detectSongKey(song, 0);
-          const oldSemitone = noteToSemitone(currentKey);
-          const newSemitone = noteToSemitone(newKey);
-          if (oldSemitone !== -1 && newSemitone !== -1) {
-            const offset = newSemitone - oldSemitone;
-            song.rawText = transposeSongText(song.rawText, offset);
-          }
-        }
-        song.originalKey = newKey;
-        window._currentTransposeOffset = 0;
-        await saveSong(song);
-        if (window._currentSongRender) window._currentSongRender();
-        updateSongActions(sheet);
-      });
-    }
-
-    document.getElementById('sheet-edit').addEventListener('click', () => {
-      const overlay = document.getElementById('settings-overlay');
-      const sheetEl = document.getElementById('settings-sheet');
-      sheetEl.classList.remove('open');
-      overlay.classList.remove('open');
-      requestUnlock(() => {
-        window.location.hash = `#/edit/${songId}`;
-      });
-    });
-
-    document.getElementById('sheet-delete').addEventListener('click', () => {
-      requestUnlock(async () => {
-        if (await showConfirm('Удалить эту песню?')) {
-          await deleteSong(songId);
-          window.location.hash = '#/';
-        }
-      });
-    });
-
-    document.getElementById('sheet-export').addEventListener('click', () => {
-      if (!song || !song.rawText) return;
-      const title = song.title || 'song';
-      const filename = title.replace(/[^a-zA-Zа-яА-Я0-9]/g, '_').substring(0, 50) + '.txt';
-      const blob = new Blob([song.rawText], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  }
-}
-
-window.updateSongActions = updateSongActions;
-window.showConfirm = showConfirm;
-
 function updateHeader() {
   const { path } = parseHash();
   const isSongView = path === 'song';
@@ -562,6 +286,11 @@ function navigate() {
     page.innerHTML = '<div class="loading">Страница не найдена</div>';
   }
 }
+
+window.updateSongActions = (sheet) => updateSongActions(sheet, { unlocked, requestUnlock, showConfirm });
+window.showConfirm = showConfirm;
+
+initStorage(config);
 
 window.addEventListener('hashchange', navigate);
 renderShell();
