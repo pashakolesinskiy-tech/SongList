@@ -1,4 +1,4 @@
-const CACHE_NAME = 'druisk-v5';
+const CACHE_NAME = 'druisk-v6';
 const ASSETS = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const ASSETS = [
   '/js/settings.js',
   '/js/lock.js',
   '/js/song-actions.js',
+  '/js/backup.js',
   '/js/parser/index.js',
   '/js/parser/chordpro.js',
   '/js/parser/plain-text.js',
@@ -14,6 +15,7 @@ const ASSETS = [
   '/js/renderer/chord-renderer.js',
   '/js/storage/firebase.js',
   '/js/utils/transpose.js',
+  '/js/utils/escape.js',
   '/js/views/home.js',
   '/js/views/favorites.js',
   '/js/views/song.js',

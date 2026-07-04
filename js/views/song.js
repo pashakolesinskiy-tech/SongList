@@ -1,6 +1,7 @@
 import { getSong, deleteSong } from '../storage/firebase.js';
 import { renderSong } from '../renderer/chord-renderer.js';
 import { transposeSongText } from '../utils/transpose.js';
+import { esc } from '../utils/escape.js';
 
 let scrollInterval = null;
 let scrollSpeed = 1;
@@ -141,12 +142,6 @@ async function createSongView(container, songId, settings, requestUnlock, unlock
 function getParser() {
   if (window._parseModule) return window._parseModule;
   return { parse: (text) => ({ parsed: { sections: [] } }) };
-}
-
-function esc(text) {
-  const d = document.createElement('div');
-  d.textContent = text || '';
-  return d.innerHTML;
 }
 
 export { createSongView };

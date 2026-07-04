@@ -121,6 +121,9 @@ function createUploadView(container, settings) {
       : parse(text, fmt);
 
     try {
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Сохранение...';
       await saveSong({
         title: container.querySelector('#song-title').value,
         artist: container.querySelector('#song-artist').value,
@@ -132,6 +135,9 @@ function createUploadView(container, settings) {
       window.location.hash = '#/';
     } catch (err) {
       alert('Ошибка: ' + err.message);
+      const submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Сохранить';
     }
   });
 

@@ -2,6 +2,7 @@ import { getSong, saveSong } from '../storage/firebase.js';
 import { parse, autoDetectAndParse } from '../parser/index.js';
 import { renderSong } from '../renderer/chord-renderer.js';
 import { transposeSongText, noteToSemitone } from '../utils/transpose.js';
+import { esc } from '../utils/escape.js';
 
 const KEY_OPTIONS = ['C', 'C#', 'Db', 'D', 'D#', 'Eb', 'E', 'F', 'F#', 'Gb', 'G', 'G#', 'Ab', 'A', 'A#', 'Bb', 'B'];
 
@@ -120,6 +121,20 @@ async function createEditView(container, songId, settings) {
       textarea.value = transposeSongText(text, offset);
     });
 
+    let hasChanges = false;
+    textarea.addEventListener('input', () => { hasChanges = true; });
+    container.querySelector('#song-title').addEventListener('input', () => { hasChanges = true; });
+    container.querySelector('#song-artist').addEventListener('input', () => { hasChanges = true; });
+
+    const backLink = container.querySelector('a[href]');
+    if (backLink) {
+      backLink.addEventListener('click', (e) => {
+        if (hasChanges && !confirm('Есть несохранённые изменения. Уйти?')) {
+          e.preventDefault();
+        }
+      });
+    }
+
     container.querySelector('#btn-preview').addEventListener('click', () => {
       const text = textarea.value.trim();
       if (!text) return;
@@ -145,6 +160,9 @@ async function createEditView(container, songId, settings) {
         : parse(text, fmt);
 
       try {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Сохранение...';
         await saveSong({
           id: songId,
           title: container.querySelector('#song-title').value,
@@ -158,6 +176,9 @@ async function createEditView(container, songId, settings) {
         window.location.hash = `#/song/${songId}`;
       } catch (err) {
         alert('Ошибка: ' + err.message);
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Сохранить';
       }
     });
 
@@ -167,12 +188,6 @@ async function createEditView(container, songId, settings) {
   } catch (err) {
     container.innerHTML = `<div class="loading">Ошибка: ${err.message}</div>`;
   }
-}
-
-function esc(text) {
-  const d = document.createElement('div');
-  d.textContent = text || '';
-  return d.innerHTML;
 }
 
 export { createEditView };

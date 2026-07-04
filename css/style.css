@@ -158,6 +158,12 @@ a { color: inherit; text-decoration: none; }
   flex: 1;
 }
 
+.song-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+}
+
 .btn-fav {
   background: none !important;
   border: none;

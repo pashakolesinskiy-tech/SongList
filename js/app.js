@@ -8,6 +8,7 @@ import { transposeSongText, transposeChord } from './utils/transpose.js';
 import { config, settings, saveSettings } from './settings.js';
 import { unlocked, requestUnlock, lockApp } from './lock.js';
 import { updateSongActions } from './song-actions.js';
+import { exportAll, importAll } from './backup.js';
 
 const appEl = document.getElementById('app');
 
@@ -126,6 +127,14 @@ function renderShell() {
           <input type="text" id="cfg-key" value="${config.anonKey}" placeholder="eyJ..." style="width:200px;padding:0.4rem 0.6rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text-primary);font-size:0.8rem;font-family:inherit;outline:none">
         </div>
       </div>
+      <div style="border-top:1px solid var(--border);padding-top:1.25rem;margin-top:0.75rem">
+        <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:0.75rem">Бэкап данных</p>
+        <div style="display:flex;gap:0.75rem">
+          <button class="btn btn-secondary" id="btn-export" style="flex:1">📥 Экспорт</button>
+          <button class="btn btn-secondary" id="btn-import" style="flex:1">📤 Импорт</button>
+          <input type="file" id="import-file" accept=".json" style="display:none">
+        </div>
+      </div>
       ` : ''}
     </div>
   `;
@@ -212,6 +221,30 @@ function renderShell() {
       config.anonKey = keyEl.value;
       localStorage.setItem('chord-viewer-config', JSON.stringify(config));
       initStorage(config);
+    });
+  }
+
+  const exportBtn = document.getElementById('btn-export');
+  const importBtn = document.getElementById('btn-import');
+  const importFile = document.getElementById('import-file');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', () => exportAll());
+  }
+  if (importBtn) {
+    importBtn.addEventListener('click', () => importFile.click());
+  }
+  if (importFile) {
+    importFile.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      try {
+        const count = await importAll(file);
+        alert(`Импортировано ${count} песен`);
+        navigate();
+      } catch (err) {
+        alert('Ошибка импорта: ' + err.message);
+      }
+      importFile.value = '';
     });
   }
 }

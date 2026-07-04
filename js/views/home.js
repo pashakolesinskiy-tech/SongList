@@ -1,5 +1,6 @@
 import { getSongs, deleteSong } from '../storage/firebase.js';
 import { getFavorites, toggleFavorite } from './favorites.js';
+import { esc } from '../utils/escape.js';
 
 async function createHomeView(container, settings, requestUnlock, unlocked) {
   container.innerHTML = `
@@ -15,6 +16,7 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
       </select>
       <button class="btn btn-secondary btn-sm" id="btn-favs" style="white-space:nowrap">♥ Избранное</button>
     </div>
+    <div class="song-count" id="song-count"></div>
     <div id="songs-list"><div class="loading">Загрузка...</div></div>
   `;
 
@@ -22,8 +24,26 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
   const searchInput = container.querySelector('#search');
   const sortSelect = container.querySelector('#sort-select');
   const favsBtn = container.querySelector('#btn-favs');
+  const countEl = container.querySelector('#song-count');
   let allSongs = [];
   let showFavsOnly = false;
+
+  function updateCount(shown, total) {
+    if (shown === total) {
+      countEl.textContent = `${total} ${declension(total, 'песня', 'песни', 'песен')}`;
+    } else {
+      countEl.textContent = `${shown} из ${total} ${declension(total, 'песня', 'песни', 'песен')}`;
+    }
+  }
+
+  function declension(n, one, few, many) {
+    const mod10 = n % 10;
+    const mod100 = n % 100;
+    if (mod100 >= 11 && mod100 <= 19) return many;
+    if (mod10 === 1) return one;
+    if (mod10 >= 2 && mod10 <= 4) return few;
+    return many;
+  }
 
   function sortSongs(songs, sortBy) {
     const sorted = [...songs];
@@ -81,14 +101,18 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
     }
   });
 
+  let searchTimeout;
   searchInput.addEventListener('input', () => {
-    const q = searchInput.value.trim();
-    if (!q) {
-      renderList(getVisibleSongs());
-      return;
-    }
-    const results = searchSongs(getVisibleSongs(), q);
-    renderSearchResults(results, q);
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      const q = searchInput.value.trim();
+      if (!q) {
+        renderList(getVisibleSongs());
+        return;
+      }
+      const results = searchSongs(getVisibleSongs(), q);
+      renderSearchResults(results, q);
+    }, 200);
   });
 
   function searchSongs(songs, query) {
@@ -141,8 +165,10 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
           <p>Ничего не найдено</p>
         </div>
       `;
+      countEl.textContent = 'Ничего не найдено';
       return;
     }
+    updateCount(results.length, allSongs.length);
 
     listEl.innerHTML = `<ul class="song-list">${results.map((r, i) => `
       <li class="song-item">
@@ -196,12 +222,14 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
           <p>Пока нет песен</p>
         </div>
       `;
+      countEl.textContent = '';
       return;
     }
 
     const sortBy = sortSelect.value;
     const sorted = sortSongs(songs, sortBy);
     const favs = getFavorites();
+    updateCount(sorted.length, allSongs.length);
 
     listEl.innerHTML = `<ul class="song-list">${sorted.map((song, i) => `
       <li class="song-item">
@@ -252,12 +280,6 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
       });
     });
   }
-}
-
-function esc(text) {
-  const d = document.createElement('div');
-  d.textContent = text || '';
-  return d.innerHTML;
 }
 
 export { createHomeView };
