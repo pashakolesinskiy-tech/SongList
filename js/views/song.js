@@ -75,8 +75,8 @@ async function createSongView(container, songId, settings, requestUnlock, unlock
         </div>
         <div class="scroll-controls" id="scroll-controls">
           <button class="scroll-btn" id="scroll-toggle" title="Автопрокрутка">▶</button>
-          <input type="range" id="scroll-speed" min="1" max="10" value="3" class="scroll-slider">
-          <span class="scroll-label" id="scroll-label">3x</span>
+          <input type="range" id="scroll-speed" min="1" max="5" value="2" class="scroll-slider">
+          <span class="scroll-label" id="scroll-label">2x</span>
         </div>
       `;
 
