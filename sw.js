@@ -1,4 +1,4 @@
-const CACHE_NAME = 'druisk-v6';
+const CACHE_NAME = 'druisk-v7';
 const ASSETS = [
   '/',
   '/index.html',
@@ -51,8 +51,8 @@ self.addEventListener('message', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Never cache Supabase or Google Fonts requests
-  if (url.hostname.includes('supabase') || url.hostname.includes('fonts')) {
+  // Never cache Google Fonts requests
+  if (url.hostname.includes('fonts')) {
     return;
   }
 

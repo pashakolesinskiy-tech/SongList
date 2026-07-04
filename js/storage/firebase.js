@@ -43,7 +43,9 @@ async function saveSong(song) {
         .single();
 
       if (error) throw error;
-      return mapFromDb(data);
+      const saved = mapFromDb(data);
+      saveToLocalStorage(saved);
+      return saved;
     } catch (e) {
       console.warn('Supabase save failed, using localStorage:', e.message);
     }
@@ -61,7 +63,9 @@ async function getSongs() {
         .order('createdAt', { ascending: false });
 
       if (error) throw error;
-      return data.map(mapFromDb);
+      const songs = data.map(mapFromDb);
+      localStorage.setItem('chord-viewer-songs', JSON.stringify(songs));
+      return songs;
     } catch (e) {
       console.warn('Supabase fetch failed, using localStorage:', e.message);
     }
@@ -98,6 +102,7 @@ async function deleteSong(id) {
         .eq('id', id);
 
       if (error) throw error;
+      deleteFromLocalStorage(id);
       return true;
     } catch (e) {
       console.warn('Supabase delete failed, using localStorage:', e.message);
