@@ -243,21 +243,29 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
 
     listEl.innerHTML = `<ul class="song-list">${sorted.map((song, i) => `
       <li class="song-item">
-        <div class="song-card">
-          <a href="#/song/${song.id}" class="song-link">
+        <a href="#/song/${song.id}">
+          <div class="song-card">
             ${settings.showNumbers ? `<span class="song-num">${i + 1}</span>` : ''}
             <div style="flex:1;overflow:hidden">
               <p class="song-title">${esc(song.title)}</p>
               ${song.artist ? `<div class="song-artist-sub">${esc(song.artist)}</div>` : ''}
             </div>
-          </a>
-          <div class="song-actions">
-            <button class="btn-fav js-fav ${favs.includes(song.id) ? 'is-fav' : ''}" data-id="${song.id}" title="Избранное" tabindex="-1">♥</button>
-            ${unlocked ? `<button class="btn btn-danger btn-sm js-delete" data-id="${song.id}">✕</button>` : ''}
+            <div class="song-actions">
+              <button class="btn-fav js-fav ${favs.includes(song.id) ? 'is-fav' : ''}" data-id="${song.id}" title="Избранное" tabindex="-1">♥</button>
+              ${unlocked ? `<button class="btn btn-danger btn-sm js-delete" data-id="${song.id}">✕</button>` : ''}
+            </div>
           </div>
-        </div>
+        </a>
       </li>
     `).join('')}</ul>`;
+
+    listEl.querySelectorAll('.song-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.js-fav') || e.target.closest('.js-delete')) {
+          e.preventDefault();
+        }
+      });
+    });
 
     listEl.querySelectorAll('.js-fav').forEach(btn => {
       btn.addEventListener('mousedown', (e) => e.preventDefault());

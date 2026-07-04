@@ -171,16 +171,11 @@ a { color: inherit; text-decoration: none; }
   font-size: 1.4rem;
   line-height: 1;
   cursor: pointer;
-  padding: 0.25rem;
+  padding: 0.5rem;
   transition: color 0.15s, transform 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   outline: none !important;
-}
-
-.btn-fav:hover {
-  color: #ef4444;
-  transform: scale(1.15);
 }
 
 .btn-fav:active {
@@ -189,6 +184,13 @@ a { color: inherit; text-decoration: none; }
 
 .btn-fav.is-fav {
   color: #ef4444;
+}
+
+@media (hover: hover) {
+  .btn-fav:not(.is-fav):hover {
+    color: #ef4444;
+    transform: scale(1.15);
+  }
 }
 
 .btn-fav:focus,
@@ -218,18 +220,8 @@ a { color: inherit; text-decoration: none; }
   padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
   transition: background 0.2s;
-}
-
-.song-link {
-  display: flex;
-  align-items: center;
-  flex: 1;
-  overflow: hidden;
-  gap: 0.5rem;
-  text-decoration: none;
-  color: inherit;
 }
 
 .song-card:hover {
