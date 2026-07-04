@@ -162,9 +162,10 @@ a { color: inherit; text-decoration: none; }
   font-size: 1.1rem;
   cursor: pointer;
   padding: 0.25rem;
-  transition: color 0.2s, transform 0.15s;
+  transition: color 0.15s, transform 0.15s;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 .btn-fav:hover {
@@ -172,8 +173,17 @@ a { color: inherit; text-decoration: none; }
   transform: scale(1.15);
 }
 
+.btn-fav:active {
+  transform: scale(0.9);
+}
+
 .btn-fav.is-fav {
   color: #ef4444;
+}
+
+.btn-fav:focus,
+.btn-fav:focus-visible {
+  outline: none;
 }
 
 /* Song list */

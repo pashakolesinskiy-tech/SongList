@@ -224,9 +224,11 @@ async function createHomeView(container, settings, requestUnlock, unlocked) {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const id = e.currentTarget.dataset.id;
+        const btn = e.currentTarget;
+        const id = btn.dataset.id;
         const isFav = toggleFavorite(id);
-        e.currentTarget.classList.toggle('is-fav', isFav);
+        btn.classList.toggle('is-fav', isFav);
+        btn.blur();
         if (showFavsOnly && !isFav) {
           renderList(getVisibleSongs());
         }
