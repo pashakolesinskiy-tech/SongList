@@ -46,8 +46,8 @@ function showConfirm(message) {
 }
 
 const config = {
-  url: '',
-  anonKey: ''
+  url: 'https://zepofyjklltfdxxomvku.supabase.co',
+  anonKey: 'sb_publishable_JJILkEwxTpf1GvkvUOv5sA_A6Nlk-gb'
 };
 
 let settings = {

@@ -37,8 +37,8 @@ function parseInlineLine(line) {
 function isChordOnlyLine(line) {
   const trimmed = line.trim();
   if (trimmed === '') return false;
-  const stripped = trimmed.replace(CHORD_TOKEN_REGEX, '').replace(/[\s\-–—|,;./\\()]/g, '');
-  return stripped.length === 0;
+  const cleaned = trimmed.replace(CHORD_TOKEN_REGEX, '').replace(/[x\d]/g, '').trim();
+  return cleaned.length === 0;
 }
 
 function extractChordPositions(line) {
@@ -82,7 +82,7 @@ function parseAboveLine(text) {
       let lyricLine = '';
       let j = i + 1;
       while (j < lines.length && lines[j].trim() === '') j++;
-      if (j < lines.length) {
+      if (j < lines.length && !SECTION_LABEL_REGEX.test(lines[j].trim())) {
         lyricLine = lines[j].trimEnd();
         j++;
       }
